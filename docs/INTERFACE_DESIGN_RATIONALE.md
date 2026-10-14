@@ -2,6 +2,8 @@
 
 김병주의 작업은 **Java 25 시퀀스 배치 알고리즘 인터페이스**입니다. 문법과 의미 데이터 구조는 다른 팀원이 담당합니다. [HTML 설명](sequence-layout-interface.html), [상세 계약](SEQUENCE_LAYOUT_CONTRACT.md), [팀 간 통합 흐름](INTERFACE_INTEGRATION.md)과 함께 읽습니다.
 
+현재 계약의 반례와 최소 보완 제안은 [부족한 부분 검토](INTERFACE_GAP_REVIEW.md)에 정리했습니다. 이 검토의 제안은 기존 코드의 완료된 기능과 구분합니다.
+
 ## 근거를 읽는 방법
 
 - **사용자 요구사항:** 시퀀스 배치 담당 범위, 다른 팀 모델을 침범하지 않는 것, 이동 좌표 재사용, Java 25, dev 통합에서 의도를 시각화하는 것.
