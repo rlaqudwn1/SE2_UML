@@ -22,3 +22,24 @@ Desktop.ini
 *.log
 tmp/
 temp/
+.omc/
+.claude/
+
+# Gradle build output
+build/
+.gradle/
+out/
+.kotlin/
+
+# Compiled classes and JVM crash logs
+*.class
+hs_err_pid*
+
+# Eclipse / IntelliJ project files (the Gradle build is the source of truth)
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+bin/
