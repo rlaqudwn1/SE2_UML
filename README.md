@@ -8,7 +8,7 @@ Mermaid처럼 텍스트로 클래스·시퀀스 다이어그램을 정의하고,
 
 [코드와 설계 근거](docs/INTERFACE_DESIGN_RATIONALE.md)에는 실제 Java 발췌, 선택 이유와 대안, Mermaid·Java 공식 레퍼런스, 구현 상태를 함께 정리했습니다.
 
-[인터페이스 부족한 부분 검토](docs/INTERFACE_GAP_REVIEW.md)에는 Astra high 검토 결과, 구체적인 반례, 최소 보완안과 팀 합의 질문을 정리했습니다. 제안 단계이며 Java 계약에는 아직 반영하지 않았습니다.
+[인터페이스 부족한 부분 검토](docs/INTERFACE_GAP_REVIEW.md)에는 Astra high 검토 결과, 구체적인 반례, 최소 보완안과 팀 합의 질문을 정리했습니다. 검토의 핵심 보완안을 Java 계약과 독립 결과 검증기에 반영했습니다. 실제 배치 엔진은 후속 구현 범위입니다.
 
 ## 개발 전략
 

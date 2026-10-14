@@ -2,7 +2,13 @@
 
 검토일: 2026-10-14. 대상: `feat/diagram-model-kim-byeongju`의 [인터페이스](../src/main/java/org/se2uml/layout/SequenceLayoutEngine.java), [계약 검증](../src/test/java/org/se2uml/layout/SequenceLayoutContractCheck.java), [상세 계약](SEQUENCE_LAYOUT_CONTRACT.md), [설계 근거](INTERFACE_DESIGN_RATIONALE.md).
 
-이 문서는 **김병주의 시퀀스 배치 입출력 계약에 대한 검토와 제안**이다. Java 25 LTS 데스크톱을 전제로 하며, 문법·파서·메시지·활성 구간의 의미 데이터 구조를 새로 정하지 않는다. 기존 Java 코드와 계약 문서를 변경하지 않았다. 아래 수치 예시는 계약의 빈틈을 설명하는 계산 사례이며 엔진 실행 결과가 아니다.
+이 문서는 **김병주의 시퀀스 배치 입출력 계약에 대한 검토와 제안**이다. Java 25 LTS 데스크톱을 전제로 하며, 문법·파서·메시지·활성 구간의 의미 데이터 구조를 새로 정하지 않는다. 검토 당시에는 기존 Java 코드와 계약 문서를 변경하지 않았다. 아래 수치 예시는 계약의 빈틈을 설명하는 계산 사례이며 엔진 실행 결과가 아니다.
+
+## 검토 이후 반영 상태
+
+아래 내용은 보완 전 계약의 반례를 기록한 검토 이력입니다. 이후 `AnchorSpec`의 연결점 높이·좌우 점유 폭, `MinimumSpan`의 연결점 사이 최소 거리, 종류가 있는 `ElementRef` 진단 대상과 독립 `SequenceLayoutValidator`를 추가했습니다. 최신 계약은 [상세 계약](SEQUENCE_LAYOUT_CONTRACT.md), 선택 이유와 실제 코드는 [설계 근거](INTERFACE_DESIGN_RATIONALE.md)를 참고하세요.
+
+현재 구현은 입출력 계약과 결과 검증까지입니다. 실제 좌표 계산 엔진·렌더러·저장 기능은 구현하지 않았습니다. 아래의 “현재”·“아직”은 검토 당시 상태를 뜻합니다.
 
 ## 판단 요약
 

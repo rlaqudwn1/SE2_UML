@@ -18,15 +18,17 @@ import java.util.Objects;
  * top-to-bottom order. Manual hints are separate from the ordered input and
  * never change semantic order. Apply feasible hints, preserve pinned coordinates
  * exactly, and report an ERROR when pins make a valid placement impossible.
- * Unpinned hints may move to satisfy spacing, with a WARNING diagnostic.
+ * Unpinned hints may move to satisfy spacing, with a POSITION_ADJUSTED WARNING
+ * targeting the moved element. See {@link SequenceLayoutValidator} for numeric
+ * tolerance and independent request/result validation.
  * Implementations must not silently reorder input or ignore an infeasible pin.
  *
  * <p>Coordinates use canvas units, with x increasing rightwards and y downwards.
  * Boxes use their top-left corner. Participant x hints refer to box left edges;
  * row y hints refer to row top edges. Row anchors are supplied in the same order
- * as the row's participant references, including duplicates. Their x coordinate
- * is the referenced participant's horizontal center; their y coordinate is
- * selected by the algorithm within the row bounds. Rendering interprets these
+ * as the row's anchor specifications, including duplicate participants. Their x
+ * coordinate is the referenced participant's horizontal center; their y
+ * coordinate is the row top plus the measured offsetY. Rendering interprets these
  * anchors without this contract assigning UML meaning to them.
  */
 public interface SequenceLayoutEngine {
@@ -41,14 +43,57 @@ public interface SequenceLayoutEngine {
         }
     }
 
-    /** Generic measured row; duplicate references support caller-defined self-call shapes. */
-    record LayoutRow(String id, List<String> participantIds, double width, double height) {
+    /**
+     * Measured anchor at a participant center. Extents reserve horizontal occupancy
+     * on each side of that center; offsetY is measured downwards from the row top.
+     * The adapter supplies these numbers without exposing semantic element kinds.
+     */
+    record AnchorSpec(String participantId, double offsetY, double leftExtent,
+                      double rightExtent) {
+        public AnchorSpec {
+            requireId(participantId);
+            nonNegative(offsetY, "offsetY");
+            nonNegative(leftExtent, "leftExtent");
+            nonNegative(rightExtent, "rightExtent");
+        }
+    }
+
+    /** Minimum absolute horizontal distance between two indices in a row's anchors. */
+    record MinimumSpan(int firstAnchorIndex, int secondAnchorIndex, double minDistance) {
+        public MinimumSpan {
+            if (firstAnchorIndex < 0 || secondAnchorIndex < 0
+                    || firstAnchorIndex == secondAnchorIndex) {
+                throw new IllegalArgumentException("Span indices must be nonnegative and distinct");
+            }
+            nonNegative(minDistance, "minDistance");
+        }
+    }
+
+    /**
+     * Generic measured row. Width is the minimum total bounds width, independent
+     * of minimumSpans; height is the minimum bounds height. Duplicate participants
+     * and different offsets permit measured self-call shapes. Each anchor's full
+     * horizontal occupancy must fit inside the final row bounds.
+     */
+    record LayoutRow(String id, List<AnchorSpec> anchors, double width, double height,
+                     List<MinimumSpan> minimumSpans) {
         public LayoutRow {
             requireId(id);
-            participantIds = List.copyOf(participantIds);
-            participantIds.forEach(SequenceLayoutEngine::requireId);
+            anchors = List.copyOf(anchors);
+            minimumSpans = List.copyOf(minimumSpans);
             positive(width, "width");
             positive(height, "height");
+            for (var anchor : anchors) {
+                if (anchor.offsetY() > height) {
+                    throw new IllegalArgumentException("Anchor offsetY exceeds measured row height");
+                }
+            }
+            for (var span : minimumSpans) {
+                if (span.firstAnchorIndex() >= anchors.size()
+                        || span.secondAnchorIndex() >= anchors.size()) {
+                    throw new IllegalArgumentException("Span index exceeds row anchor count");
+                }
+            }
         }
     }
 
@@ -98,7 +143,8 @@ public interface SequenceLayoutEngine {
                 if (!rowIds.add(row.id())) {
                     throw new IllegalArgumentException("Duplicate row ID: " + row.id());
                 }
-                requireKnown(row.participantIds(), participantIds, "row participant");
+                requireKnown(row.anchors().stream().map(AnchorSpec::participantId).toList(),
+                        participantIds, "row participant");
             }
             requireKnown(manualLayout.participantX().keySet(), participantIds, "participant hint");
             requireKnown(manualLayout.rowY().keySet(), rowIds, "row hint");
@@ -126,13 +172,22 @@ public interface SequenceLayoutEngine {
 
     enum Severity { WARNING, ERROR }
 
-    /** elementId is optional: null denotes a diagram-wide diagnostic. */
-    record Diagnostic(Severity severity, String code, String message, String elementId) {
+    enum ElementKind { PARTICIPANT, ROW }
+
+    /** IDs are scoped by kind: a participant and a row may share the same ID. */
+    record ElementRef(ElementKind kind, String id) {
+        public ElementRef {
+            Objects.requireNonNull(kind, "kind");
+            requireId(id);
+        }
+    }
+
+    /** target is optional: null denotes a diagram-wide diagnostic. */
+    record Diagnostic(Severity severity, String code, String message, ElementRef target) {
         public Diagnostic {
             Objects.requireNonNull(severity, "severity");
             requireId(code);
             requireId(message);
-            if (elementId != null) requireId(elementId);
         }
     }
 
@@ -140,7 +195,8 @@ public interface SequenceLayoutEngine {
      * Final geometry. A successful result contains exactly one box per input ID
      * and one anchor list per row, with the input reference count and order.
      * Participant boxes retain their measured size. Row bounds must be at least
-     * their measured size and contain their anchors. All boxes/anchors fit in
+     * their measured size, contain their anchors and asymmetric extents, and satisfy
+     * minimumSpans. Anchor y is row y plus offsetY. All boxes/anchors fit in
      * canvasBounds and obey LayoutOptions spacing: participantGap horizontally,
      * rowGap vertically, headerGap between the lowest participant box and the
      * first row, and margin around all content. Maps do not carry ordering;
@@ -166,6 +222,7 @@ public interface SequenceLayoutEngine {
             diagnostics = List.copyOf(diagnostics);
         }
 
+        /** Only inspects diagnostic severity; it does not validate geometry. */
         public boolean hasErrors() {
             return diagnostics.stream().anyMatch(diagnostic -> diagnostic.severity() == Severity.ERROR);
         }
