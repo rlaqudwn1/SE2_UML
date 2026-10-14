@@ -22,7 +22,7 @@ SE2_UML은 텍스트로 클래스·시퀀스 다이어그램을 정의하고, �
 
 공통 모델을 먼저 `dev`에 병합한 후 다이어그램별 구현을 진행한다. 첫 기능 브랜치만 미리 생성하며, 나머지는 선행 작업 병합 후 최신 `dev`에서 생성한다.
 
-모델 협업 단계에서는 개인 작업 브랜치를 `feat/diagram-model`에서 분기한다. 김병주의 클래스 모델 작업 브랜치는 `feat/diagram-model-kim-byeongju`이며 PR 대상은 `feat/diagram-model`이다. 두 팀이 모델 계약을 확인한 후 `feat/diagram-model`을 `dev`에 통합한다.
+모델 협업 단계에서는 개인 작업 브랜치를 `feat/diagram-model`에서 분기한다. 김병주의 시퀀스 배치 알고리즘 인터페이스 작업 브랜치는 `feat/diagram-model-kim-byeongju`이며 PR 대상은 `feat/diagram-model`이다. 문법·의미 데이터 구조는 다른 팀원이 담당하며 개인 브랜치에서 정의하거나 변경하지 않는다. 담당자들이 접점 계약을 확인한 후 `feat/diagram-model`을 `dev`에 통합한다.
 
 ## 모델 설계 원칙
 
@@ -45,5 +45,7 @@ git switch -c feat/layout-core
 2. 기능 브랜치를 push하고 `dev` 대상 PR을 만든다.
 3. 병합 후 기능 브랜치를 삭제한다.
 4. 통합 동작을 검증한 뒤 `dev`에서 `main`으로 PR을 만든다.
+
+`dev` 통합에서는 [인터페이스 연결도](docs/INTERFACE_INTEGRATION.md)를 바탕으로 팀별 입력·출력과 의도를 함께 설명한다. 계약 검토에서는 같은 예시 데이터와 기대 결과 그림을 사용하고, 실제 엔진이 구현된 뒤에는 실행 결과도 확인한다.
 
 버그 수정 브랜치는 `fix/<문제명>`을 사용하며, 일반 수정은 최신 `dev`에서 시작한다. 배포 버전의 긴급 수정이 필요한 경우 `main`에서 시작하고 수정 결과를 `dev`에도 반영한다.
