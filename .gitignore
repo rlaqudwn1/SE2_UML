@@ -1,0 +1,24 @@
+# OS-generated files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Local IDE settings and editor temporary files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local environment and secrets (keep sample configuration)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
