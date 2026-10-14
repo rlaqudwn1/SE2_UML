@@ -27,6 +27,8 @@ Java 기준은 **Java 25**입니다. [Oracle 공식 다운로드 안내](https:/
 
 [HTML 설명 화면](sequence-layout-interface.html)에서 책임 경계, 입력 타입, 좌표 제약과 결과 예시를 함께 확인할 수 있습니다. 화면의 계산은 계약 설명용이며 실제 Java 엔진 구현이 아닙니다.
 
+실제 코드 발췌, 선택 이유·대안, 검증된 레퍼런스와 팀 합의가 필요한 정책은 [코드와 설계 근거](INTERFACE_DESIGN_RATIONALE.md)에 정리했습니다.
+
 계약 파일은 [SequenceLayoutEngine.java](../src/main/java/org/se2uml/layout/SequenceLayoutEngine.java)입니다. 진입점은 `SequenceLayoutEngine.layout(LayoutRequest)`이며, `LayoutResult`를 반환합니다. 외부 문법·의미 모델 클래스에는 의존하지 않습니다.
 
 | 타입 | 배치 관점의 역할 |
