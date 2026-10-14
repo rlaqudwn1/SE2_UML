@@ -41,6 +41,40 @@ Java 기준은 **Java 25**입니다. [Oracle 공식 다운로드 안내](https:/
 
 `LayoutRow`는 메시지 의미 모델이 아닙니다. 호출자가 메시지 등을 화면의 행으로 변환해 전달하며, 자기 호출처럼 같은 참여자가 여러 번 연결되는 경우도 어댑터가 표현합니다. 메시지 종류나 문법을 배치 엔진이 결정하지 않습니다.
 
+### 입력과 출력의 연결
+
+```mermaid
+flowchart LR
+    P["participants<br/>가로 순서 + 측정 크기"] --> Q["LayoutRequest"]
+    R["rows<br/>세로 순서 + 참조 + 측정 크기"] --> Q
+    M["manualLayout<br/>참여자 x / 행 y 제약"] --> Q
+    O["options<br/>간격 + 여백"] --> Q
+    Q --> E["SequenceLayoutEngine.layout"]
+    E --> S["LayoutResult"]
+    S --> B["participantBounds / rowBounds<br/>요소 영역"]
+    S --> A["rowAnchors<br/>행의 연결점"]
+    S --> C["canvasBounds<br/>전체 영역"]
+    S --> D["diagnostics / hasErrors()<br/>경고와 실패 판단"]
+```
+
+### 필드별 의미
+
+| 타입 | 필드 | 전달하려는 의미 |
+| --- | --- | --- |
+| `ParticipantBox` | `id`, `width`, `height` | 가로 배치할 박스의 식별자와 측정 크기 |
+| `LayoutRow` | `id`, `participantIds`, `width`, `height` | 행 식별자, 순서 있는 참여자 참조, 필요한 측정 크기 |
+| `ManualLayout` | `participantX`, `rowY` | ID별 참여자 왼쪽 x와 행 위쪽 y 제약 |
+| `PositionHint` | `coordinate`, `pinned` | 요청 좌표와 정확히 고정할지 여부 |
+| `LayoutOptions` | `participantGap` | 인접 참여자 박스 사이 최소 가로 간격 |
+| `LayoutOptions` | `rowGap` | 인접 행 사이 최소 세로 간격 |
+| `LayoutOptions` | `headerGap` | 가장 아래까지 내려온 참여자 박스와 첫 행 사이 최소 간격 |
+| `LayoutOptions` | `margin` | 전체 콘텐츠 주변 여백 |
+| `Bounds` | `x`, `y`, `width`, `height` | 왼쪽 위 좌표와 영역 크기 |
+| `Point` | `x`, `y` | 하나의 연결점 좌표 |
+| `Diagnostic` | `severity`, `code`, `message`, `elementId` | 경고·오류 수준, 진단 코드, 설명, 관련 ID |
+
+`Diagnostic.elementId`가 null이면 다이어그램 전체 진단입니다. `code`는 문자열이며 표준 코드 목록은 아직 확정하지 않았습니다. 입력 리스트 순서는 보존하지만 결과 Map의 반복 순서는 보장하지 않습니다. 호출자는 입력 순서와 ID 조회를 함께 사용합니다.
+
 ## 배치 계약의 기본 규칙
 
 - 좌표는 확대·스크롤과 독립적인 다이어그램 좌표이며 x는 오른쪽, y는 아래로 증가합니다.
@@ -63,6 +97,81 @@ Java 기준은 **Java 25**입니다. [Oracle 공식 다운로드 안내](https:/
 성공 결과의 `participantBounds`와 `rowBounds`는 입력 ID마다 하나의 경계를 포함합니다. `rowAnchors`의 순서와 개수는 행의 참여자 참조와 같으며, 중복 참조도 유지합니다. 연결점의 x는 참여자 박스 중심, y는 해당 행의 경계 안에서 엔진이 정합니다. 연결점에 UML 의미를 부여하는 일은 렌더러·어댑터의 책임입니다.
 
 같은 요소의 좌표를 다시 적용하려면 ID가 유지되어야 합니다. 이름 변경·텍스트 재입력 시 동일성을 판단하는 방법은 파서와 모델 담당의 책임이며, 배치 엔진은 이름으로 ID를 추정하지 않습니다. 삭제한 요소의 위치 정리도 호출자가 담당합니다.
+
+## HTML 화면과 같은 입력·출력 예시
+
+아래는 계약 설명용 예시이며 실제 Java 엔진 실행 결과가 아닙니다. Java 25에서 사용할 수 있는 타입 표기를 사용합니다. JSON serializer나 다른 팀원의 문법·의미 모델을 정의하지 않습니다.
+
+### 기본 요청
+
+```java
+import java.util.List;
+import java.util.Map;
+import org.se2uml.layout.SequenceLayoutEngine.*;
+
+var request = new LayoutRequest(
+    List.of(
+        new ParticipantBox("p1", 80, 40),
+        new ParticipantBox("p2", 80, 40)
+    ),
+    List.of(
+        new LayoutRow("r1", List.of("p1", "p2"), 220, 30),
+        new LayoutRow("r2", List.of("p2", "p1"), 220, 30)
+    ),
+    new ManualLayout(
+        Map.of("p2", new PositionHint(220, true)),
+        Map.of()
+    ),
+    new LayoutOptions(20, 40, 40, 20)
+);
+```
+
+이 예시에서는 p2의 왼쪽을 x=220에 고정하고, p1과 각 행에는 수동 좌표를 지정하지 않습니다.
+
+### 기본 요청에 대한 기대 결과의 한 가지 예
+
+| 출력 필드 | ID | 기대 값 |
+| --- | --- | --- |
+| `participantBounds` | `p1` | `Bounds(40, 20, 80, 40)` |
+| `participantBounds` | `p2` | `Bounds(220, 20, 80, 40)` |
+| `rowBounds` | `r1` | `Bounds(70, 100, 220, 30)` |
+| `rowBounds` | `r2` | `Bounds(70, 170, 220, 30)` |
+| `rowAnchors` | `r1` | `[Point(80, 115), Point(260, 115)]` |
+| `rowAnchors` | `r2` | `[Point(260, 185), Point(80, 185)]` |
+| `canvasBounds` | 전체 | `Bounds(20, 0, 300, 220)` |
+| `diagnostics` | 전체 | 빈 리스트, `hasErrors() == false` |
+
+자동 배치의 유일한 정답 좌표를 정한 것은 아닙니다. 이 값들은 계약의 순서·측정 크기·간격·여백 조건을 만족하는 예시입니다. `r2`의 참조 순서가 `[p2, p1]`이므로 연결점도 그 순서를 유지합니다.
+
+### 네 가지 좌표 요청 비교
+
+공통 조건은 p2의 왼쪽 x=220 고정, p1의 폭=80, `participantGap=20`입니다. 따라서 p1의 왼쪽 x는 최대 120까지 두면 최소 간격을 만족합니다.
+
+| HTML 모드 | p1에 전달하는 제약 | 기대 처리 | 진단 |
+| --- | --- | --- | --- |
+| 자동 배치 | p1 항목 없음 | 예시에서는 x=40으로 배치 | 없음 |
+| 고정 위치 | `PositionHint(80, true)` | x=80을 정확히 유지 | 없음 |
+| 선호 위치 | `PositionHint(180, false)` | 예시에서는 x=120으로 조정 | `WARNING` |
+| 충돌 예시 | `PositionHint(180, true)` | p2 고정 위치와 함께 간격을 만족할 수 없음 | `ERROR` |
+
+고정 충돌에서는 입력은 유효하지만 위치 제약을 동시에 만족할 수 없습니다. 엔진은 오류 진단을 반환해야 하며, HTML은 정상 출력 영역을 비우고 충돌하는 **요청 위치**를 따로 표시합니다. 입력 ID·크기·참조가 잘못된 경우에는 요청 생성 시 예외가 발생하므로 이 상황과 구분합니다.
+
+### 렌더러가 결과를 받는 흐름
+
+```java
+// engine은 팀에서 구현·연결할 SequenceLayoutEngine입니다.
+var result = engine.layout(request);
+if (result.hasErrors()) {
+    // diagnostics를 설명하고 기존의 유효한 화면을 유지하거나 재요청합니다.
+    // 오류 결과의 좌표를 정상 배치로 사용하지 않습니다.
+} else {
+    // 입력 순서대로 ID를 조회해 participantBounds / rowBounds를 표시합니다.
+    // rowAnchors를 원본 의미 모델과 연결해 선·화살표를 그립니다.
+    // WARNING 진단이 있으면 선호 좌표 조정 사실을 사용자에게 알립니다.
+}
+```
+
+배치 결과를 화면에 그리는 동작과 사용자 위치를 저장하는 동작은 호출자의 책임입니다. 배치 인터페이스는 입력을 변경하거나 직접 저장하지 않습니다.
 
 ## 구현 상태와 후속 작업
 
