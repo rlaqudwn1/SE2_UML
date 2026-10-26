@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "sequence",
+  "participants": [
+    {
+      "id": "p-user",
+      "symbol": "U",
+      "label": "사용자",
+      "kind": "participant"
+    },
+    {
+      "id": "p-server",
+      "symbol": "S",
+      "label": "서버",
+      "kind": "participant"
+    }
+  ],
+  "events": [
+    {
+      "id": "m-request",
+      "kind": "message",
+      "from": "p-user",
+      "to": "p-server",
+      "text": "조회 요청",
+      "arrow": "->>"
+    },
+    {
+      "id": "a-start",
+      "kind": "activate",
+      "participant": "p-server"
+    },
+    {
+      "id": "m-self",
+      "kind": "message",
+      "from": "p-server",
+      "to": "p-server",
+      "text": "캐시 확인",
+      "arrow": "->>"
+    },
+    {
+      "id": "m-result",
+      "kind": "message",
+      "from": "p-server",
+      "to": "p-user",
+      "text": "조회 결과",
+      "arrow": "-->>"
+    },
+    {
+      "id": "a-end",
+      "kind": "deactivate",
+      "participant": "p-server"
+    }
+  ]
+}

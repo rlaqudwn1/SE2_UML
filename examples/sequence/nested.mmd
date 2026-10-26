@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant U as 사용자
+    participant S as 서버
+    U->>S: 로그인
+    activate S
+    alt 인증 성공
+        loop 항목마다
+            S->>S: 항목 처리
+        end
+        S-->>U: 성공
+    else 인증 실패
+        S-->>U: 실패
+    end
+    deactivate S

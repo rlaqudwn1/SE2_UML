@@ -1,0 +1,8 @@
+sequenceDiagram
+    participant U as 사용자
+    participant S as 서버
+    U->>S: 조회 요청
+    activate S
+    S->>S: 캐시 확인
+    S-->>U: 조회 결과
+    deactivate S
