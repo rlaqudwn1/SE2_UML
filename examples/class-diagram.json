@@ -1,0 +1,152 @@
+{
+  "schemaVersion": "1.0",
+  "id": "doc-order-class",
+  "name": "주문 클래스",
+  "kind": "class",
+  "model": {
+    "classes": [
+      {
+        "id": "Order",
+        "name": "Order",
+        "kind": "class",
+        "isAbstract": false,
+        "attributes": [
+          {
+            "id": "order-status",
+            "name": "status",
+            "type": "OrderStatus",
+            "visibility": "private",
+            "isStatic": false
+          }
+        ],
+        "methods": [
+          {
+            "id": "order-total",
+            "name": "total",
+            "visibility": "public",
+            "isStatic": false,
+            "isAbstract": false,
+            "returnType": "Money",
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "id": "OrderItem",
+        "name": "OrderItem",
+        "kind": "class",
+        "isAbstract": false,
+        "attributes": [],
+        "methods": []
+      },
+      {
+        "id": "OrderRepository",
+        "name": "OrderRepository",
+        "kind": "interface",
+        "isAbstract": true,
+        "attributes": [],
+        "methods": [
+          {
+            "id": "repository-save",
+            "name": "save",
+            "visibility": "public",
+            "isStatic": false,
+            "isAbstract": true,
+            "returnType": "void",
+            "parameters": [
+              {
+                "id": "save-order",
+                "name": "order",
+                "type": "Order"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "SqlOrderRepository",
+        "name": "SqlOrderRepository",
+        "kind": "class",
+        "isAbstract": false,
+        "attributes": [],
+        "methods": []
+      }
+    ],
+    "relationships": [
+      {
+        "id": "order-items",
+        "kind": "composition",
+        "source": "Order",
+        "target": "OrderItem",
+        "sourceMultiplicity": "1",
+        "targetMultiplicity": "1..*",
+        "targetRole": "items"
+      },
+      {
+        "id": "repository-realization",
+        "kind": "realization",
+        "source": "SqlOrderRepository",
+        "target": "OrderRepository"
+      },
+      {
+        "id": "repository-order",
+        "kind": "dependency",
+        "source": "OrderRepository",
+        "target": "Order",
+        "label": "persists"
+      }
+    ]
+  },
+  "layout": {
+    "nodes": [
+      {
+        "id": "Order",
+        "x": 100,
+        "y": 80
+      },
+      {
+        "id": "OrderItem",
+        "x": 420,
+        "y": 80
+      }
+    ],
+    "sizes": [
+      {
+        "id": "Order",
+        "width": 300,
+        "height": 180
+      }
+    ],
+    "edges": [
+      {
+        "id": "order-items",
+        "waypoints": [
+          {
+            "x": 350,
+            "y": 240
+          },
+          {
+            "x": 500,
+            "y": 240
+          }
+        ]
+      }
+    ]
+  },
+  "source": {
+    "language": "mermaid",
+    "text": "classDiagram\n    class Order {\n        -OrderStatus status\n        +total() Money\n    }\n    class OrderItem\n    class OrderRepository {\n        <<interface>>\n        +save(Order order) void\n    }\n    class SqlOrderRepository\n    Order \"1\" *-- \"1..*\" OrderItem : items\n    SqlOrderRepository ..|> OrderRepository\n    OrderRepository ..> Order : persists\n"
+  },
+  "styles": {
+    "fontFamily": "sans-serif",
+    "fontSize": 32,
+    "elements": [
+      {
+        "id": "Order",
+        "fill": "#FFFFFF",
+        "stroke": "#000000",
+        "textColor": "#000000"
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+classDiagram
+    class Order {
+        -OrderStatus status
+        +total() Money
+    }
+    class OrderItem
+    class OrderRepository {
+        <<interface>>
+        +save(Order order) void
+    }
+    class SqlOrderRepository
+    Order "1" *-- "1..*" OrderItem : items
+    SqlOrderRepository ..|> OrderRepository
+    OrderRepository ..> Order : persists

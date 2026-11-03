@@ -1,0 +1,14 @@
+sequenceDiagram
+    actor customer as 고객
+    participant service as OrderService
+    participant repository as OrderRepository
+    participant events as EventBus
+    customer->>service: 주문 요청
+    activate service
+    service->>repository: save(order)
+    activate repository
+    repository-->>service: 저장 완료
+    deactivate repository
+    service-)events: OrderPlaced
+    service-->>customer: 주문 번호
+    deactivate service

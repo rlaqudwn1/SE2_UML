@@ -2,7 +2,25 @@
 
 Mermaid처럼 텍스트로 클래스·시퀀스 다이어그램을 정의하고, 화면에서 이동한 요소의 위치를 저장·복원하는 UML 도구를 개발합니다.
 
-현재는 저장소와 브랜치 전략을 설정한 단계입니다. 아래 내용은 구현할 기능과 개발 순서를 설명합니다.
+현재는 공통 모델 계약과 클래스·시퀀스 예시 데이터를 정의한 단계입니다. 파서, 렌더러, 편집기 구현은 후속 작업입니다.
+
+## 모델 계약과 예시
+
+- [모델 설계 및 검증 규칙](docs/diagram-model.md)
+- [DiagramDocument JSON Schema (Draft 2020-12)](schemas/diagram-document.schema.json)
+- [클래스 다이어그램 예시](examples/class-diagram.json)
+- [시퀀스 다이어그램 예시](examples/sequence-diagram.json)
+- [제공 요구사항 대응표 및 미결정 사항](docs/requirements-traceability.md)
+
+예시는 Mermaid 원문(`examples/*.mmd`)과 원문·모델·배치·스타일을 묶은 로컬 저장 JSON으로 구성됩니다. 도형 크기와 간선 꺾임점도 저장하며 클래스/참여자는 최대 30개입니다. 실제 파서·화면·5단계 undo·이미지 출력은 후속 구현 대상입니다.
+
+```bash
+python -m pip install -r requirements-dev.txt
+python scripts/validate_examples.py
+python -m unittest discover -s scripts -p "test_*.py"
+```
+
+구현 언어가 정해지기 전까지 JSON Schema를 공통 인터페이스로 사용합니다. 의미 데이터와 사용자 배치를 분리하고, 실행 순서는 시퀀스 의미 모델에서 관리합니다.
 
 ## 개발 전략
 

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0",
+  "id": "doc-order-sequence",
+  "name": "주문 저장 흐름",
+  "kind": "sequence",
+  "model": {
+    "participants": [
+      {
+        "id": "customer",
+        "name": "고객",
+        "kind": "actor"
+      },
+      {
+        "id": "service",
+        "name": "OrderService",
+        "kind": "object"
+      },
+      {
+        "id": "repository",
+        "name": "OrderRepository",
+        "kind": "object"
+      },
+      {
+        "id": "events",
+        "name": "EventBus",
+        "kind": "object"
+      }
+    ],
+    "messages": [
+      {
+        "id": "place",
+        "name": "주문 요청",
+        "kind": "sync",
+        "from": "customer",
+        "to": "service"
+      },
+      {
+        "id": "save",
+        "name": "save(order)",
+        "kind": "sync",
+        "from": "service",
+        "to": "repository"
+      },
+      {
+        "id": "saved",
+        "name": "저장 완료",
+        "kind": "reply",
+        "from": "repository",
+        "to": "service",
+        "replyTo": "save"
+      },
+      {
+        "id": "publish",
+        "name": "OrderPlaced",
+        "kind": "async",
+        "from": "service",
+        "to": "events"
+      },
+      {
+        "id": "result",
+        "name": "주문 번호",
+        "kind": "reply",
+        "from": "service",
+        "to": "customer",
+        "replyTo": "place"
+      }
+    ],
+    "activations": [
+      {
+        "id": "service-active",
+        "participantId": "service",
+        "startMessageId": "place",
+        "endMessageId": "result"
+      },
+      {
+        "id": "repository-active",
+        "participantId": "repository",
+        "startMessageId": "save",
+        "endMessageId": "saved"
+      }
+    ]
+  },
+  "layout": {
+    "participants": [
+      {
+        "id": "customer",
+        "x": 100
+      },
+      {
+        "id": "service",
+        "x": 340
+      }
+    ],
+    "messageSpacing": [
+      {
+        "id": "publish",
+        "gapBefore": 24
+      }
+    ],
+    "sizes": [
+      {
+        "id": "service",
+        "width": 300,
+        "height": 80
+      }
+    ],
+    "edges": [
+      {
+        "id": "publish",
+        "waypoints": [
+          {
+            "x": 350,
+            "y": 240
+          },
+          {
+            "x": 500,
+            "y": 240
+          }
+        ]
+      }
+    ]
+  },
+  "source": {
+    "language": "mermaid",
+    "text": "sequenceDiagram\n    actor customer as 고객\n    participant service as OrderService\n    participant repository as OrderRepository\n    participant events as EventBus\n    customer->>service: 주문 요청\n    activate service\n    service->>repository: save(order)\n    activate repository\n    repository-->>service: 저장 완료\n    deactivate repository\n    service-)events: OrderPlaced\n    service-->>customer: 주문 번호\n    deactivate service\n"
+  },
+  "styles": {
+    "fontFamily": "sans-serif",
+    "fontSize": 32,
+    "elements": [
+      {
+        "id": "service",
+        "fill": "#FFFFFF",
+        "stroke": "#000000",
+        "textColor": "#000000"
+      }
+    ]
+  }
+}

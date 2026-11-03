@@ -22,3 +22,8 @@ Desktop.ini
 *.log
 tmp/
 temp/
+
+# Python model validation
+__pycache__/
+*.py[cod]
+.venv/
