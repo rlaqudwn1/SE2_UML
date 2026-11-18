@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "sequence",
+  "participants": [
+    {
+      "id": "p-user",
+      "symbol": "U",
+      "label": "사용자",
+      "kind": "participant"
+    },
+    {
+      "id": "p-server",
+      "symbol": "S",
+      "label": "서버",
+      "kind": "participant"
+    }
+  ],
+  "events": [
+    {
+      "id": "m-login",
+      "kind": "message",
+      "from": "p-user",
+      "to": "p-server",
+      "text": "로그인",
+      "arrow": "->>"
+    },
+    {
+      "id": "a-start",
+      "kind": "activate",
+      "participant": "p-server"
+    },
+    {
+      "id": "f-auth",
+      "kind": "altStart",
+      "text": "인증 성공"
+    },
+    {
+      "id": "f-items",
+      "kind": "loopStart",
+      "text": "항목마다"
+    },
+    {
+      "id": "m-process",
+      "kind": "message",
+      "from": "p-server",
+      "to": "p-server",
+      "text": "항목 처리",
+      "arrow": "->>"
+    },
+    {
+      "id": "e-items",
+      "kind": "loopEnd",
+      "frame": "f-items"
+    },
+    {
+      "id": "m-success",
+      "kind": "message",
+      "from": "p-server",
+      "to": "p-user",
+      "text": "성공",
+      "arrow": "-->>"
+    },
+    {
+      "id": "b-failure",
+      "kind": "else",
+      "frame": "f-auth",
+      "text": "인증 실패"
+    },
+    {
+      "id": "m-failure",
+      "kind": "message",
+      "from": "p-server",
+      "to": "p-user",
+      "text": "실패",
+      "arrow": "-->>"
+    },
+    {
+      "id": "e-auth",
+      "kind": "altEnd",
+      "frame": "f-auth"
+    },
+    {
+      "id": "a-end",
+      "kind": "deactivate",
+      "participant": "p-server"
+    }
+  ]
+}
